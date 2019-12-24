@@ -1,6 +1,7 @@
 # Semantic Kernel - Visualization of Neural Concept Graphs #
 
-One Paragraph of project description goes here
+Semantic kernel trains neural embeddings of a plain text data set either as vanilla texts or tabular data, and generate a conceptual graph based on a query list. The graph is hierarchical such that the first level are the $m$ strongest associated terms with the query list (displayed in caps), and the second level is the $n$ strongest associated terms with the first level.   
+
 
 ## Getting Started
 
