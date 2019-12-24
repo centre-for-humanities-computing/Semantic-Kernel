@@ -2,6 +2,8 @@
 
 import os
 import pandas as pd
+from nltk.tokenize.stanford import StanfordTokenizer
+from nltk import word_tokenize
 
 
 class Corpus(object):
@@ -35,6 +37,17 @@ class Corpus(object):
             df = pd.read_csv(self.fpaths[0])
             self.content = df.content.values
 
+    def normalize(self, lang):
+        #tokenizer = StanfordTokenizer()
+        #tokenizer = word_tokenize()
+        self.read()
+        if lang == "da":
+            print("DANISH")
+            print(word_tokenize(self.content[0]))
+        else:
+            print(lang)
+
+
     
 
 
@@ -45,7 +58,9 @@ def main():
     fpath = os.path.join("dat","tabular")
     DATA = Corpus("foobar", fpath)
     DATA.read()
-    print(DATA.content[0])
+    #print(DATA.content[0])
+
+    print(DATA.normalize("da"))
 
 if __name__ == "__main__":
     main()
