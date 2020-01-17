@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from nltk.tokenize.stanford import StanfordTokenizer
 from nltk import word_tokenize
+import lemmy as le
 
 
 class Corpus(object):
@@ -38,12 +39,29 @@ class Corpus(object):
             self.content = df.content.values
 
     def normalize(self, lang):
-        #tokenizer = StanfordTokenizer()
-        #tokenizer = word_tokenize()
+    """ linguistic normalization
+        lemma: list of str containing 
+
+    """
+        # TODO: implement with standford NLP lemmatization pipeline
         self.read()
+        self.lemma = list()
         if lang == "da":
+            lemmatizer = le.load(lang)
             print("DANISH")
-            print(word_tokenize(self.content[0]))
+            for text in self.content[:2]:
+                text_lemmas = list()
+                tokens = word_tokenize(text)
+                for token in tokens:
+                    lemma = lemmatizer.lemmatize("", token)
+                    text_lemmas.append(lemma[-1].lower())
+                self.lemma.append(text_lemmas)
+        #    for i, token in enumerate(tokens):
+        #        print(token, "->", text_lemmas[i])
+
+        #    #tokens = word_tokenize(self.content)
+
+
         else:
             print(lang)
 
@@ -56,11 +74,10 @@ class Corpus(object):
 def main():
     print("\n\n test main() for semantic_vect \n\n") 
     fpath = os.path.join("dat","tabular")
-    DATA = Corpus("foobar", fpath)
+    DATA = Corpus("foobar", fpath)# instantiate a corpus object
     DATA.read()
-    #print(DATA.content[0])
-
-    print(DATA.normalize("da"))
-
+    DATA.normalize("da")
+    
+    print(DATA.lemma[2])
 if __name__ == "__main__":
     main()
