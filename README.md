@@ -40,7 +40,7 @@ Explain how to run the automated tests for this system
 
 test that neural embeddings are trained by `semantic_vect`
 ```
-./test/test1.sh
+./test.sh
 ```
 
 ### And coding style tests
