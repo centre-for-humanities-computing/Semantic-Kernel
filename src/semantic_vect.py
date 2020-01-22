@@ -2,9 +2,11 @@
 
 import os
 import pandas as pd
-from nltk.tokenize.stanford import StanfordTokenizer
-from nltk import word_tokenize
-import lemmy as le
+import stanfordnlp
+from nltk import sent_tokenize
+import gensim
+import logging
+import pickle
 
 
 class Corpus(object):
@@ -25,7 +27,7 @@ class Corpus(object):
         Attributes:
             fnames: list of str containing filename on files on path 
             fpaths: list of str containing relative path and filename to files on path
-            content
+            content: list of str containing content of files on path
         """
         self.fnames = os.listdir(self.path)
         self.fpaths = [os.path.join(self.path,fname) for fname in self.fnames]
@@ -37,47 +39,62 @@ class Corpus(object):
         else:
             df = pd.read_csv(self.fpaths[0])
             self.content = df.content.values
+        
 
-    def normalize(self, lang):
-    """ linguistic normalization
-        lemma: list of str containing 
+    def normalize(self, lang="da"):
+        """ linguistic normalization
+        lemma: list of str containing lemmas of content whitespace tokenized
 
-    """
-        # TODO: implement with standford NLP lemmatization pipeline
+        """
         self.read()
         self.lemma = list()
-        if lang == "da":
-            lemmatizer = le.load(lang)
-            print("DANISH")
-            for text in self.content[:2]:
-                text_lemmas = list()
-                tokens = word_tokenize(text)
-                for token in tokens:
-                    lemma = lemmatizer.lemmatize("", token)
-                    text_lemmas.append(lemma[-1].lower())
-                self.lemma.append(text_lemmas)
-        #    for i, token in enumerate(tokens):
-        #        print(token, "->", text_lemmas[i])
-
-        #    #tokens = word_tokenize(self.content)
-
-
-        else:
-            print(lang)
-
-
+        nlp = stanfordnlp.Pipeline(processors='tokenize,mwt,pos,lemma',lang=lang)
+        for i, text in enumerate(self.content[:10]):# TODO: to full index
+            if type(text) == str:
+                doc = nlp(text)
+                lemmas = [word.lemma for sent in doc.sentences for word in sent.words]
+                self.lemma.append(" ".join(lemmas))
+                #print(lemmas)
+            else:#TODO: move test for sring to read() method
+                self.lemma.append("NA")
+                print("file {} is corrupt".format(i))
     
+    def sentsplit(self, source, lang="da"):
+        self.sentences = list()
+        if source == "lemma":
+            self.normalize(lang)
+            for lemma in self.lemma:
+                self.sentences.append(sent_tokenize(lemma))
+        else:
+            self.read()
+            for text in self.content:
+                if type(text) == str:
+                    self.sentences.append(sent_tokenize(text))
 
-
-
-
+        self.sentences = [sent for text in self.sentences for sent in text]
+        
 def main():
-    print("\n\n test main() for semantic_vect \n\n") 
+    # data
     fpath = os.path.join("dat","tabular")
     DATA = Corpus("foobar", fpath)# instantiate a corpus object
-    DATA.read()
-    DATA.normalize("da")
+    DATA.sentsplit("lemma")
+    sent_tokens = [sentence.split() for sentence in DATA.sentences]
+    logging.basicConfig(
+        format='%(asctime)s : %(levelname)  s : %(message)s',
+        level=logging.INFO
+        )
+    # model
+    mdl = gensim.models.Word2Vec(size=128, window=5, min_count=5, workers=4)
+    mdl.build_vocab(sent_tokens)
+    mdl.train(sent_tokens, total_examples=mdl.corpus_count, epochs=mdl.iter)
+    # result
+    embeddings = dict()
+    for word in list(mdl.wv.vocab.keys()):
+        embeddings[word] = mdl[word]
     
-    print(DATA.lemma[2])
+    with open(os.path.join("mdl","embeddings.pcl"), 'wb') as handle:
+        pickle.dump(embeddings, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
 if __name__ == "__main__":
     main()
