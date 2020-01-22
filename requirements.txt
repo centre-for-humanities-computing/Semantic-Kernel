@@ -1,0 +1,4 @@
+gensim>=3.7.3
+nltk>=3.4.1
+pandas>=0.24.2
+stanfordnlp>=0.2.0
