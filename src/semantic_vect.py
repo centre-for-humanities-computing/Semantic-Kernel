@@ -11,7 +11,6 @@ import pickle
 
 class Corpus(object):
     """ A basic corpus class for reading documents ('content') from vanilla or tabular files
-    
     Attributes:
         name: str representing the corpus' name
         path: str representing the relative path
@@ -23,7 +22,6 @@ class Corpus(object):
     
     def read(self):
         """ Reads filenames and content of file(s) on path
-
         Attributes:
             fnames: list of str containing filename on files on path 
             fpaths: list of str containing relative path and filename to files on path
@@ -43,7 +41,8 @@ class Corpus(object):
 
     def normalize(self, lang="da"):
         """ linguistic normalization
-        lemma: list of str containing lemmas of content whitespace tokenized
+        Attributes:
+            lemma: list of str containing lemmas of content whitespace tokenized
 
         """
         self.read()
@@ -60,6 +59,10 @@ class Corpus(object):
                 print("file {} is corrupt".format(i))
     
     def sentsplit(self, source, lang="da"):
+        """ sentence tokenization
+            Attributes:
+                sentences: list of str containing either lemmatized or original sentences of content
+        """
         self.sentences = list()
         if source == "lemma":
             self.normalize(lang)
@@ -72,7 +75,8 @@ class Corpus(object):
                     self.sentences.append(sent_tokenize(text))
 
         self.sentences = [sent for text in self.sentences for sent in text]
-        
+
+
 def main():
     # data
     fpath = os.path.join("dat","tabular")
