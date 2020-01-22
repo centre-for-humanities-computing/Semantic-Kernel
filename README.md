@@ -9,10 +9,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-For running in virtual environment (recommended)
+For running in virtual environment (recommended) and assuming python3.6+ is installed.
 
 ```
-sudo apt-get install python3-pip
 sudo pip3 install virtualenv
 virtualenv -p /usr/bin/python3.6 nuke
 source nuke/bin/activate
