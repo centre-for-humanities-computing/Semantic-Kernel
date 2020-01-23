@@ -1,5 +1,3 @@
-#!/home/knielbo/virtenvs/nuke/bin/python
-
 import os
 import pandas as pd
 import stanfordnlp
