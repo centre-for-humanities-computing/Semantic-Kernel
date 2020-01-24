@@ -1,7 +1,11 @@
+#!/home/knielbo/virtenvs/nuke/bin/python
+
 import os
+import numpy as np
 import pandas as pd
 import stanfordnlp
 from nltk import sent_tokenize
+
 
 class Corpus(object):
     """ A basic corpus class for reading documents ('content') from vanilla or tabular files
@@ -42,7 +46,7 @@ class Corpus(object):
         self.read()
         self.lemma = list()
         nlp = stanfordnlp.Pipeline(processors='tokenize,mwt,pos,lemma',lang=lang)
-        for i, text in enumerate(self.content[:10]):# TODO: to full index
+        for i, text in enumerate(self.content[:100]):# TODO: to full index
             if type(text) == str:
                 doc = nlp(text)
                 lemmas = [word.lemma for sent in doc.sentences for word in sent.words]
@@ -69,3 +73,22 @@ class Corpus(object):
                     self.sentences.append(sent_tokenize(text))
 
         self.sentences = [sent for text in self.sentences for sent in text]
+
+
+def nmax_idx(l, n=1):
+    """ indices for n largest values
+    """
+    return sorted(range(len(l)), key=lambda x: l[x])[-n:]
+
+
+def nmin_idx(l, n=1):
+    """ indices for n smallest values
+    """
+    return np.argpartition(l, n)
+
+
+flatten = lambda l: [item for sublist in l for item in sublist]# TODO: remove lambda
+
+
+if __name__ == "__main__":
+    pass
