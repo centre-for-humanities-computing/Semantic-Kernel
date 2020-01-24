@@ -25,8 +25,8 @@ def main():
     embeddings = dict()
     for word in list(mdl.wv.vocab.keys()):
         embeddings[word] = mdl[word]
-        print(word)
-        print(mdl[word])
+        #print(word)
+        #print(mdl[word])
     
     with open(os.path.join("mdl","embeddings.pcl"), 'wb') as handle:
         pickle.dump(embeddings, handle, protocol=pickle.HIGHEST_PROTOCOL)
