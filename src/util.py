@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import stanfordnlp
 from nltk import sent_tokenize
-
+import pickle
 
 class Corpus(object):
     """ A basic corpus class for reading documents ('content') from vanilla or tabular files
@@ -46,15 +46,21 @@ class Corpus(object):
         self.read()
         self.lemma = list()
         nlp = stanfordnlp.Pipeline(processors='tokenize,mwt,pos,lemma',lang=lang)
-        for i, text in enumerate(self.content[:100]):# TODO: to full index
-            if type(text) == str:
+        for i, text in enumerate(self.content):# TODO: to full index
+            #if type(text) == str:
+            print(i)
+            try:
                 doc = nlp(text)
                 lemmas = [word.lemma for sent in doc.sentences for word in sent.words]
+            #if type(lemmas) == str:
                 self.lemma.append(" ".join(lemmas))
+            except:
+                pass
+                #self.lemma = "NA"
                 #print(lemmas)
-            else:#TODO: move test for sring to read() method
-                self.lemma.append("NA")
-                print("file {} is corrupt".format(i))
+            #else:#TODO: move test and assert for sring to read() method
+            #    self.lemma.append("NA")
+            #    print("file {} is corrupt".format(i))
     
     def sentsplit(self, source, lang="da"):
         """ sentence tokenization
@@ -86,6 +92,13 @@ def nmin_idx(l, n=1):
     """
     return np.argpartition(l, n)
 
+
+def load_mdl(fpath):
+    """ load serialized object
+    """
+    with open(fpath, "rb") as handle:
+        mdl = pickle.load(handle)
+    return mdl
 
 flatten = lambda l: [item for sublist in l for item in sublist]# TODO: remove lambda
 
