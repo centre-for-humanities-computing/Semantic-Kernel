@@ -7,8 +7,9 @@ echo pipeline init
 while true;do echo -n '>';sleep 1;done &
 
 #python src/semantic_vect.py #> log_corpus.txt # &>/dev/null
-python src/nucleus_build.py hader spiser Hade vej
-#python -W ignore build_graph.py
+#python src/nucleus_build.py Skydebanegade Mysundegade Enghave Plads Dannebrogsgade
+python src/nucleus_build.py vartov bordel støj råb
+python -W ignore src/graph_build.py
 
 
 kill $!; trap 'kill $!' SIGTERM
