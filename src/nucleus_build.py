@@ -4,18 +4,13 @@ import sys
 import pickle
 import numpy as np
 
-from util import nmax_idx, flatten
+from util import nmax_idx, flatten, load_mdl
 
 from scipy import spatial
 
 import stanfordnlp
 
 ##### UTIL
-def load_mdl(fpath):
-    with open(fpath, "rb") as handle:
-        mdl = pickle.load(handle)
-    return mdl
-
 def norm_seeds(lst, lang="da"):
     nlp = stanfordnlp.Pipeline(processors='tokenize,mwt,pos,lemma',lang=lang)
     seeds = " ".join(lst)
@@ -24,7 +19,7 @@ def norm_seeds(lst, lang="da"):
     return sorted(list(set(seeds)))
 
 ##### MAIN
-def build_delta(DB, seeds, k=3, m=5):
+def build_delta(DB, seeds, k=10, m=3):
     lexicon = sorted(DB.keys())
 
     nucle_types = dict()
@@ -33,7 +28,7 @@ def build_delta(DB, seeds, k=3, m=5):
             deltas = list()
             for i, target in enumerate(lexicon):
                 deltas.append(1 - spatial.distance.cosine(DB[source], DB[target]))
-            #  deltas.append(spatial.distance.cosine(DB[source], DB[target]))
+            #  deltas.append(spatial.distance.cosine(DB[source], DB[target]))# TODO: distance instead of similarity
             # print(i)
         else:
             continue
@@ -65,7 +60,6 @@ def build_delta(DB, seeds, k=3, m=5):
     nucle_token_lst = list(set(flatten(nucle_token_lst)))
     nucle_token_lst.sort()
 
-
     # compute delta matrix
     embedding_dim = DB.popitem()[1].shape[0]
     X = np.zeros((len(nucle_token_lst), embedding_dim))
@@ -83,6 +77,23 @@ def build_delta(DB, seeds, k=3, m=5):
         else:
             labels.append(token)
 
+    return X, DELTA, labels
+
+
+def main():
+    seeds = sys.argv[1:]# for single graph CMD input
+
+    #with open(sys.argv[1], 'r') as f:# for loop folder input
+    #    seeds = f.read().split()
+    #print(seeds)
+    with open("filename.txt", "w") as fobj:
+        fobj.write(seeds[0])
+
+    seeds = norm_seeds(seeds, lang="da")
+    #print(seeds)
+    
+    DB = load_mdl(os.path.join("mdl", "embeddings.pcl"))
+    X, DELTA, labels = build_delta(DB, seeds)
     # write query vectors
     np.savetxt(
         os.path.join("mdl", "query_mat.dat"), X, delimiter=","
@@ -96,32 +107,5 @@ def build_delta(DB, seeds, k=3, m=5):
         for label in labels:
             f.write("%s\n" % label)
 
-
-
-
-
-
-
-
-
-
-
-
-def main():
-    seeds = sys.argv[1:]
-    #" ". join(sorted(list(set([seed.lower() for seed in sys.argv[1:]]))))
-    #print(" ".join(seeds))
-    seeds = norm_seeds(seeds, lang="da")
-    print(seeds)
-
-    DB = load_mdl(os.path.join("mdl", "embeddings.pcl"))
-
-    #print(DB.popitem()[1].shape[0])
-    
-    build_delta(DB, seeds)    
-
-
-
 if __name__ == "__main__":
     main()
-
